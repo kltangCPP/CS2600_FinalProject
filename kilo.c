@@ -185,15 +185,16 @@ int getWindowSize(int *rows, int *cols) {
 
 /*** row operations ***/
 
-int editorRowCxToRx(erow *row, int cx) {
-    int rx = 0;
-    int j;
-    for (j = 0; j < cx; j++) {
-        if (row->chars[j] == '\t')
-            rx += (KILO_TAB_STOP - 1) - (rx % KILO_TAB_STOP);
-        rx++;
+int editorRowRxToCx(erow *row, int rx) {
+    int cur_rx = 0;
+    int cx;
+    for (cx = 0; cx < row->size; cx++) {
+        if (row->chars[cx] == '\t')
+        cur_rx += (KILO_TAB_STOP - 1) - (cur_rx % KILO_TAB_STOP);
+        cur_rx++;
+        if (cur_rx > rx) return cx;
     }
-    return rx;
+    return cx;
 }
 
 void editorUpdateRow(erow *row) {
@@ -396,7 +397,7 @@ void editorSave() {
 void editorFind() {
     char *query = editorPrompt("Search: %s (ESC to cancel)");
     if (query == NULL) return;
-    
+
     int i;
     for (i = 0; i < E.numrows; i++) {
         erow *row = &E.row[i];
